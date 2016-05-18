@@ -3,11 +3,11 @@
 \moderncvcolor{grey}
 
 \usepackage[margin=.5in]{geometry}
-
+\usepackage[none]{hyphenat}
 \usepackage{moderntimeline}
 
 \tlenablemonths
-\tlmaxdates{2012}{2016}
+\tlmaxdates{2012}{2018}
 
 \name{Revan}{Sopher}
 \address{}{Piscataway, NJ}
@@ -15,22 +15,30 @@
 \email{rsopher@gmail.com}
 \social[github]{github.com/revan}
 \homepage{rsopher.com}
-\photo[90pt][0.4pt]{revan.jpg}
+\photo[90pt][0.4pt]{revan.png}
 
 \begin{document}
 \maketitle
 
 \section{Education}
 
-\tllabelcventry
-    {2012}{0}{2012~-~2016}
+\tlcventry
+    {2012/9}{2016/5}
+    {Rutgers University}
     {Double Major: Electrical/Computer Engineering and Computer Science}
-    {\break Rutgers University}
-    {}
-    {\textbf{GPA: 3.8}}
+    {Minor: Mathematics}
+    {\textbf{GPA: 3.832}}
     {Engineering Honors Program, Slade Scholars Program, Presidential Scholarship (full),\\National Merit Scholarship, NASA New Jersey Space Grant Consortium Fellow}
 
 \section{Work}
+
+	\tllabelcventry
+		{2016/8}{0}{2016}
+		{Google}
+		{Software Engineer, Tools and Infrastructure}
+		{Mountain View, CA}
+		{}
+		{Firebase team.}
 
     \tllabelcventry
         {2015/5}{2015/8}{2015}
@@ -48,59 +56,61 @@
         {}
         {Social team. Contributed across stack to build a group therapy system on Android and iOS, with database monitoring and internal tools. Built onboarding flow, notification center.\\}
 
-    \tllabelcventry
-        {2013/3}{2014/5}{2013~-~2014} %looks weird being the only item with an end date below
+    \tlcventry
+        {2013/3}{2014/5}
         {Nian-Crae Inc.}
         {Full Stack Developer}
         {Piscataway, NJ}
         {}
         {Developed system to log and upload patient therapy metrics from Android devices into a database,\\and a web interface to visualize engagement.\\}
 
-    \tllabelcventry
-        {2013/7}{2013/7}{2013}
-        {Governor's School of Engineering and Technology}
-        {Research Mentor}
-        {Piscataway, NJ}
-        {}
-        {Taught mobile game development and version control to high school students.}
+    % \tllabelcventry
+    %     {2013/7}{2013/7}{2013}
+    %     {Governor's School of Engineering and Technology}
+    %     {Research Mentor}
+    %     {Piscataway, NJ}
+    %     {}
+    %     {Taught mobile game development and version control to high school students.}
 
 \section{Skills}
 \cvitem{Proficient}
        {Java, Scala, Python, C, Android, Git, Linux}
 \cvitem{Some}
        {JavaScript, MATLAB, Go, Play, Kafka, MySQL, Cassandra}
-\cvitem{Languages}
+\cvitem{Fluent}
        {English, French}
+
+\section{Relevant Courses}
 \cvitem{Undergrad}
-       {Algorithms, Artificial Intelligence, Computer Architecture, Data Structures, Distributed Systems, Operating Systems, Robotics and Computer Vision, Software Engineering}
+       {Algorithms, Artificial Intelligence, Computer Architecture, Cryptography, Data Structures, Distributed Systems, Internet Technology, Operating Systems, Robotics and Computer Vision, Software Engineering}
 \cvitem{Grad}
        {Natural Language Processing, Numerical Analysis}
 
 \section{Research}
     \tlcventry
-        {2014/9}{0}
-        {Detecting Planes in Real-Time for Camera Display Communications}
+        {2014/9}{2016/5}
+		{Reading Between the Pixels: Real-Time Dynamic Steganography using Android}
         {}
         {}
-        {WINLAB}
+        {}
         {Implementing subtle embedded calibrationless visible-light communication for next-gen QR tags.}
 
-    \tllabelcventry
-        {2014/2}{2014/6}{2014}
-        {Programmatically Determining Bus Occupancy}
-        {Independent Study}
-        {}
-        {WINLAB}
-        {Built a predictive model of occupancy based on network traffic captured from a laptop.}
+%    \tllabelcventry
+%        {2014/2}{2014/6}{2014}
+%        {Programmatically Determining Bus Occupancy}
+%        {Independent Study}
+%        {}
+%        {WINLAB}
+%        {Built a predictive model of occupancy based on network traffic captured from a laptop.}
 
 \section{Leadership}
-\tlcventry
-        {2015/2}{0}
+	\tlcventry
+        {2015/2}{2016/5}
         {Program Manager}
         {}
         {IEEE Student Branch}
         {}
-        {Organizing technical workshops for ECE underclassmen.}
+        {Organized technical workshops and gave lectures for ECE underclassmen.}
     %\cventry
     %    {Summer~2013}
     %    {Summer Intern}
