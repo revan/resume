@@ -273,15 +273,12 @@
 \newcommand{\tllabelcventry}[9][color1]{%
 \tl@formatendyear{#3}
 \tl@formatstartyear{#2}
-\tl@splitlabels{#4}
  \cventry{\tikz[baseline=0pt]{
      \tl@tlcvbar
      \fill [#1] (0,0)
         ++(\tl@startfraction*\hintscolumnwidth,0pt)
-        node [tl@startyear] {\tl@startlabel}
-        rectangle (\tl@endfraction*\hintscolumnwidth,\tl@width-1pt)
-        node [tl@endyear] {\tl@endlabel}
-        (\hintscolumnwidth,0pt) ;
+	node [tl@startyear] {#4}
+        rectangle (\tl@endfraction*\hintscolumnwidth,\tl@width-1pt);
     \ifissince
        \newdimen\fullcolorwidth
        \pgfmathsetlength\fullcolorwidth{\tl@startfraction*(1+(1-\tl@startfraction)*\tl@nsfrac)*\hintscolumnwidth}
