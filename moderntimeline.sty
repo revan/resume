@@ -20,7 +20,7 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}[1999/12/01]
 \ProvidesPackage{moderntimeline}
-    [2015/08/31 0.9 Add timelines to moderncv entries]
+    [2020/06/11 0.11 Add timelines to moderncv entries]
 \ProvidesPackage{moderntimeline}
 \RequirePackage{tikz}
 \RequirePackage{kvoptions}
@@ -30,6 +30,8 @@
 }
 \DeclareStringOption{firstyear}
 \DeclareStringOption{lastyear}
+\DeclareStringOption{marksmo}[0.2ex]
+\DeclareStringOption{marksyr}[0.4ex]
 \ProcessKeyvalOptions*
 \newif\ifstartyear
 \newif\ifissince
@@ -42,6 +44,12 @@
 }
 \newcommand{\tlrunningcolor}[1]{%
    \def\tl@runningcolor{#1}
+}
+\newcommand{\tlmarkheightmo}[1]{%
+    \def\tl@marksmo{#1}
+}
+\newcommand{\tlmarkheightyr}[1]{%
+    \def\tl@marksyr{#1}
 }
 \newcommand{\tlsince}[1]{%
    \def\tl@since{#1}
@@ -92,6 +100,18 @@
 \newcommand{\tldisablemonths}{%
    \def\tl@nomonthvalue{0}
 }
+\newcommand{\tldisablemarksyr}{%
+    \def\tl@marksyr{}
+}
+\newcommand{\tlenablemarksyr}{%
+    \def\tl@marksyr{0.4ex}
+}
+\newcommand{\tldisablemarksmo}{%
+    \def\tl@marksmo{}
+}
+\newcommand{\tlenablemarksmo}{%
+    \def\tl@marksmo{0.2ex}
+}
 \tltext{\scriptsize}
 \tlwidth{0.8ex}
 \tlrunningwidth{0.05ex}
@@ -135,11 +155,34 @@
     \pgfmathsetmacro\tl@tmpmonth{#1}%
   \fi
 }
+\newcommand{\tl@tlcvbar}{
+    \pgfmathsetmacro\tl@yearrange{\tl@lastyear-\tl@firstyear}
+    \pgfmathsetmacro\tl@totalmonths{12*\tl@yearrange}%
+    \pgfmathsetmacro\tl@tickdistmo{\hintscolumnwidth/\tl@totalmonths}%
+    \pgfmathsetmacro\tl@tickdistyr{\hintscolumnwidth/\tl@yearrange}%
+    \useasboundingbox (0,-1.5ex) rectangle (\hintscolumnwidth,1ex);
+    \fill [\tl@runningcolor] (0,0)
+    rectangle (\hintscolumnwidth,\tl@runningwidth);
+    \ifx\tl@marksyr\empty\relax\else
+        \foreach \x in {0, ..., \tl@yearrange}
+        \draw [\tl@runningcolor](\x*\tl@tickdistyr pt,0ex) -- (\x*\tl@tickdistyr pt,\tl@marksyr);
+    \fi
+    \ifx\tl@marksmo\empty\relax\else
+        \foreach \x in {0, ..., \tl@totalmonths}
+        \draw [\tl@runningcolor](\x*\tl@tickdistmo pt,0ex) -- (\x*\tl@tickdistmo pt,\tl@marksmo);
+    \fi
+}
 \newcommand{\tl@splitlabels}[1]{
   \gdef\tl@startlabel{}% Resetting
   \begingroup%
   \edef\@tempa{#1///}%
   \expandafter\endgroup\expandafter\tl@splitlabels@auxi\@tempa\@nnil%
+  \ifx\tl@startlabel\empty\relax%
+    \gdef\tl@startlabel{#1}
+  \fi
+  \ifissince%
+    \xdef\tl@startlabel{\tl@since \tl@startlabel}
+  \fi
 }
 \newcommand{\tl@splitlabels@auxi}[2]{}
 \def\tl@splitlabels@auxi#1///#2\@nnil{%
@@ -177,9 +220,8 @@
 \newcommand{\tldatelabelcventry}[8][color1]{%
 \issincefalse
 \tl@formatstartyear{#2}
-\cventry{\tikz{
-     \fill [\tl@runningcolor] (0,0)
-        rectangle (\hintscolumnwidth,\tl@runningwidth);
+\cventry{\tikz[baseline=0pt]{
+    \tl@tlcvbar
      \fill [#1] (0,0)
         ++(\tl@startfraction*\hintscolumnwidth,0pt)
         node [tl@startyear] {#3}
@@ -192,9 +234,7 @@
 \issincefalse
 \tl@formatstartyear{#2}
 \cventry{\tikz[baseline=0pt]{
-    \useasboundingbox (0,-1.5ex) rectangle (\hintscolumnwidth,1ex);
-    \fill [\tl@runningcolor] (0,0)
-       rectangle (\hintscolumnwidth,\tl@runningwidth);
+    \tl@tlcvbar
     \fill [#1] (0,0)
        ++(\tl@startfraction*\hintscolumnwidth,0pt)
        node [tl@singleyear] {#2}
@@ -207,9 +247,7 @@
 \tl@formatendyear{#3}
 \tl@formatstartyear{#2}
  \cventry{\tikz[baseline=0pt]{
-    \useasboundingbox (0,-1.5ex) rectangle (\hintscolumnwidth,1ex);
-    \fill [\tl@runningcolor] (0,0)
-       rectangle (\hintscolumnwidth,\tl@runningwidth);
+    \tl@tlcvbar
     \fill [#1] (0,0)
        ++(\tl@startfraction*\hintscolumnwidth,0pt)
        node [tl@startyear] {\tl@startlabel}
@@ -223,7 +261,7 @@
 (\tl@startfraction*\hintscolumnwidth,0)
            rectangle (\fullcolorwidth,\tl@width);
        \shade [left color=#1] (\fullcolorwidth,0)
-           rectangle (\tl@endfraction*\hintscolumnwidth,\tl@width);
+           rectangle (\tl@endfraction*\hintscolumnwidth + 1,\tl@width);
     \else
        \fill [#1] (\tl@startfraction*\hintscolumnwidth,0)
            rectangle (\tl@endfraction*\hintscolumnwidth,\tl@width);
@@ -235,15 +273,15 @@
 \newcommand{\tllabelcventry}[9][color1]{%
 \tl@formatendyear{#3}
 \tl@formatstartyear{#2}
+\tl@splitlabels{#4}
  \cventry{\tikz[baseline=0pt]{
-     \fill [\tl@runningcolor] (0,0)
-        rectangle (\hintscolumnwidth,\tl@runningwidth);
-     \useasboundingbox (0,-1.5ex)
-        rectangle (\hintscolumnwidth,1ex);
+     \tl@tlcvbar
      \fill [#1] (0,0)
         ++(\tl@startfraction*\hintscolumnwidth,0pt)
-        node [tl@startyear] {#4}
-        rectangle (\tl@endfraction*\hintscolumnwidth,\tl@width-1pt) ;
+        node [tl@startyear] {\tl@startlabel}
+        rectangle (\tl@endfraction*\hintscolumnwidth,\tl@width-1pt)
+        node [tl@endyear] {\tl@endlabel}
+        (\hintscolumnwidth,0pt) ;
     \ifissince
        \newdimen\fullcolorwidth
        \pgfmathsetlength\fullcolorwidth{\tl@startfraction*(1+(1-\tl@startfraction)*\tl@nsfrac)*\hintscolumnwidth}

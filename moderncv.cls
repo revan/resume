@@ -1,5 +1,5 @@
 %% start of file `moderncv.cls'.
-%% Copyright 2006-2015 Xavier Danaux (xdanaux@gmail.com).
+%% Copyright 2006-2015 Xavier Danaux (xdanaux@gmail.com), 2020-2021 moderncv maintainers (github.com/moderncv).
 %
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License version 1.3c,
@@ -10,7 +10,7 @@
 %                identification
 %-------------------------------------------------------------------------------
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{moderncv}[2015/07/28 v2.0.0 modern curriculum vitae and letter document class]
+\ProvidesClass{moderncv}[2021/01/21 v2.1.0 modern curriculum vitae and letter document class]
 
 
 %-------------------------------------------------------------------------------
@@ -95,21 +95,34 @@
     \xetexorluatexfalse
   \fi
 \fi
-% automatic loading of latin modern fonts
-%\ifxetexorluatex
-%  \RequirePackage{fontspec}
-%  \defaultfontfeatures{Ligatures=TeX}
-%  \RequirePackage{unicode-math}
-%  \setmainfont{Latin Modern}
-%  \setsansfont{Latin Modern Sans}
-%  \setmathfont{Latin Modern Math}
-%\else
-  \RequirePackage[T1]{fontenc}
-  \IfFileExists{lmodern.sty}%
-    {\RequirePackage{lmodern}}%
-    {}
-%\fi
 
+% do not use inputenc and do not automatically load lmodern to avoid problems with German 
+% charactes, see
+% https://tex.stackexchange.com/questions/496630/lualatex-problems-with-german-characters
+\ifxetexorluatex
+%     \RequirePackage{fontspec}
+%     \defaultfontfeatures{Ligatures=TeX}
+%     \RequirePackage{unicode-math}
+%     \setmainfont{Latin Modern}
+%     \setsansfont{Latin Modern Sans}
+%     \setmathfont{Latin Modern Math}
+%     \ifluatex
+%         \usepackage{luatextra}
+%         \usepackage{lualatex-math} %loads fontspec
+%         \usepackage{shellesc} % fix a bug for lualatex shellescape
+%     \fi
+\else
+    \RequirePackage[utf8]{inputenc}
+%     \RequirePackage[utf8]{inputenx}
+%     %additions for utf8
+%     \input{ix-utf8enc.dfu}
+    \RequirePackage[T1]{fontenc}
+    % loading lmodern can cause issues with certain special characters. avoid. 
+%     \IfFileExists{lmodern.sty}%
+%         {\RequirePackage{lmodern}}%
+%         {}
+%     \fi
+\fi
 % hyper links (hyperref is loaded at the end of the preamble to pass options required by loaded packages such as CJK)
 \newcommand*\pdfpagemode{UseNone}% do not show thumbnails or bookmarks on opening (on supporting browsers); set \pdfpagemode to "UseOutlines" to show bookmarks
 \RequirePackage{url}
@@ -128,9 +141,9 @@
     bookmarksopen = true,
     bookmarksdepth= 2,% to show sections and subsections
     pdfauthor     = {\@firstname{}~\@lastname{}},
-    pdftitle      = {\@firstname{}~\@lastname{}\notblank{\@title}{}{}},
-    pdfsubject    = {Resum\'{e} of \@firstname{}~\@lastname{}},
-    pdfkeywords   = {\@firstname{}~\@lastname{}, curriculum vit\ae{}, resum\'{e}}}}
+    pdftitle      = {\@firstname{}~\@lastname{}},
+    pdfsubject    = {R\'{e}sum\'{e} of \@firstname{}~\@lastname{}},
+    pdfkeywords   = {\@firstname{}~\@lastname{}, curriculum vit\ae{}, r\'{e}sum\'{e}}}}
 
 % graphics
 \RequirePackage{graphicx}
@@ -155,13 +168,13 @@
           \settowidth{\pagenumberwidth}{\color{color2}\addressfont\itshape\strut\thepage/\pageref{lastpage}}%
           \fancypagestyle{plain}{%
             \fancyfoot[r]{\parbox[b]{\pagenumberwidth}{\color{color2}\pagenumberfont\strut\thepage/\pageref{lastpage}}}}% the parbox is required to ensure alignment with a possible center footer (e.g., as in the casual style)
-          \pagestyle{plain}}{}}%
-      \AtEndDocument{\label{lastpage}}\else\fi}}
+          \pagestyle{plain}}{}}\fi}%
+  \AtEndDocument{\label{lastpage}}}
 \pagestyle{plain}
 
 % reduced list spacing
 % package providing hooks into lists
-%   originally developped by Jakob Schiøtz (see http://dcwww.camd.dtu.dk/~schiotz/comp/LatexTips/tweaklist.sty)
+%   originally developped by Jakob Schiotz (see http://dcwww.camd.dtu.dk/~schiotz/comp/LatexTips/tweaklist.sty)
 %   modified and distributed with moderncv(not available otherwise on ctan)
 \RequirePackage{tweaklist}
 \renewcommand*{\itemhook}{%
@@ -191,6 +204,7 @@
 % compatibility package with older versions of moderncv
 \RequirePackageWithOptions{moderncvcompatibility}
 
+\RequirePackage{expl3}
 
 %-------------------------------------------------------------------------------
 %                class definition
@@ -247,20 +261,39 @@
 % usage: \phone[<optional type>]{<number>}
 % where <optional type> should be either "fixed" (default), "mobile" or "fax
 \collectionnew{phones}
-\newcommand*{\phone}[2][fixed]{\collectionadd[#1]{phones}{#2}}
+\NewDocumentCommand{\phone}{O{fixed}m}{%
+  \ifthenelse{\equal{#1}{fax}}%
+    {\collectionadd[#1]{phones}{#2}}
+    {\collectionadd[#1]{phones}{\protect\tellink{#2}}}
+    }
 
+
+% http://latex.org/forum/viewtopic.php?t=12239
+\def\SplitMyMacro#1/#2{#2}
+    
+    
 % adds a social link to one's personal information (optional)
 % usage: \social[<optional type>][<optional url>]{<account name>}
-% where <optional type> should be either "linkedin", "twitter" or "github"
+% where <optional type> should be either "linkedin", "xing", "twitter", "github", "gitlab", "bitbucket" or "skype"
 \collectionnew{socials}
 \NewDocumentCommand{\social}{O{}O{}m}{%
   \ifthenelse{\equal{#2}{}}%
     {%
-      \ifthenelse{\equal{#1}{linkedin}}{\collectionadd[linkedin]{socials}{\protect\httplink[#3]{www.#3}}}{}%
-      \ifthenelse{\equal{#1}{twitter}} {\collectionadd[twitter]{socials} {\protect\httplink[#3]{www.#3}}}{}%
-      \ifthenelse{\equal{#1}{github}}  {\collectionadd[github]{socials}  {\protect\httplink[#3]{www.#3}}}{}%
-    }
-    {\collectionadd[#1]{socials}{\protect\httplink[#3]{#2}}}}
+      \ifthenelse{\equal{#1}{linkedin}}     {\collectionadd[linkedin]{socials}     {\protect\httpslink[#3]{www.linkedin.com/in/#3}}}               {}%
+      \ifthenelse{\equal{#1}{xing}}         {\collectionadd[xing]{socials}         {\protect\httpslink[#3]{www.xing.com/profile/#3}}}              {}%
+      \ifthenelse{\equal{#1}{twitter}}      {\collectionadd[twitter]{socials}      {\protect\httpslink[#3]{www.twitter.com/#3}}}                   {}%
+      \ifthenelse{\equal{#1}{github}}       {\collectionadd[github]{socials}       {\protect\httpslink[#3]{#3}}}                    {}%
+      \ifthenelse{\equal{#1}{gitlab}}       {\collectionadd[gitlab]{socials}       {\protect\httpslink[#3]{www.gitlab.com/#3}}}                    {}%
+      \ifthenelse{\equal{#1}{stackoverflow}}{\collectionadd[stackoverflow]{socials}{\protect\httpslink[#3]{stackoverflow.com/users/#3}}}           {}%
+      \ifthenelse{\equal{#1}{bitbucket}}    {\collectionadd[bitbucket]{socials}    {\protect\httpslink[#3]{www.bitbucket.org/#3}}}                  {}%
+      \ifthenelse{\equal{#1}{skype}}        {\collectionadd[skype]{socials}        {#3}}                                                           {}%
+      \ifthenelse{\equal{#1}{orcid}}        {\collectionadd[orcid]{socials}        {\protect\httpslink[#3]{orcid.org/#3}}}                         {}%
+      \ifthenelse{\equal{#1}{researchgate}} {\collectionadd[researchgate]{socials} {\protect\httpslink[#3]{www.researchgate.net/profile/#3}}}      {}%
+      \ifthenelse{\equal{#1}{researcherid}} {\collectionadd[researcherid]{socials} {\protect\httpslink[#3]{www.researcherid.com/rid/#3}}}          {}%
+      \ifthenelse{\equal{#1}{telegram}}     {\collectionadd[telegram]{socials}     {\protect\httpslink[#3]{t.me/#3}}}                              {}%
+      \ifthenelse{\equal{#1}{googlescholar}}{\collectionadd[googlescholar]{socials}{\protect\httpslink[#3]{scholar.google.com/citations?user=#3}}} {}%                        {}%
+      }
+    {\collectionadd[#1]{socials}{\protect\httpslink[#3]{#2}}}}
 
 % defines additional personal information (optional)
 % usage: \extrainfo{<text>}
@@ -288,16 +321,26 @@
 \renewcommand{\theenumiv}          {\@Alph\c@enumiv}
 
 % other symbols
-\newcommand*{\listitemsymbol}      {\labelitemi~}
-\newcommand*{\addresssymbol}       {}
-\newcommand*{\mobilephonesymbol}   {}
-\newcommand*{\fixedphonesymbol}    {}
-\newcommand*{\faxphonesymbol}      {}
-\newcommand*{\emailsymbol}         {}
-\newcommand*{\homepagesymbol}      {}
-\newcommand*{\linkedinsocialsymbol}{}
-\newcommand*{\twittersocialsymbol} {}
-\newcommand*{\githubsocialsymbol}  {}
+\newcommand*{\listitemsymbol}           {\labelitemi~}
+\newcommand*{\addresssymbol}            {}
+\newcommand*{\mobilephonesymbol}        {}
+\newcommand*{\fixedphonesymbol}         {}
+\newcommand*{\faxphonesymbol}           {}
+\newcommand*{\emailsymbol}              {}
+\newcommand*{\homepagesymbol}           {}
+\newcommand*{\linkedinsocialsymbol}     {}
+\newcommand*{\xingsocialsymbol}         {}
+\newcommand*{\twittersocialsymbol}      {}
+\newcommand*{\githubsocialsymbol}       {}
+\newcommand*{\gitlabsocialsymbol}       {}
+\newcommand*{\stackoverflowsocialsymbol}{}
+\newcommand*{\bitbucketsocialsymbol}    {}
+\newcommand*{\skypesocialsymbol}        {}
+\newcommand*{\orcidsocialsymbol}        {}
+\newcommand*{\researchgatesocialsymbol} {}
+\newcommand*{\researchidsocialsymbol}   {}
+\newcommand*{\googlescholarsocialsymbol}{}
+\newcommand*{\telegramsocialsymbol}     {}
 
 % other
 %------
@@ -312,34 +355,39 @@
 % usage: \makefooter
 \newcommand*{\makefooter}{}%
 
+\newcommand*{\@loadmoderncvpackage}[3][]{%
+  \begingroup\edef\x{\endgroup%
+    \noexpand\RequirePackage[#1]{moderncv#2\ifcase#3\or i\or ii\or iii\or iv\or v\or vi\or vii\or viii\or ix\or x\fi}%
+  }\x}
+
 % loads a style variant (a combination of header, body and footer)
 % usage: \moderncvstyle{<style variant name>}
-\newcommand*{\moderncvstyle}[2][]{
+\newcommand*{\moderncvstyle}[2][]{%
   \RequirePackage[#1]{moderncvstyle#2}}
 
 % loads a header variant
 % usage: \moderncvhead[<optional head option>]{<header variant number>}
-\newcommand*{\moderncvhead}[2][]{
-  \expandafter\RequirePackage\expandafter[\expandafter#1\expandafter]{\expandafter moderncvhead\romannumeral #2}}
+\newcommand*{\moderncvhead}[2][]{%
+  \@loadmoderncvpackage[#1]{head}{#2}}
 
 % loads a body variant
 % usage: \moderncvbody[<optional body option>]{<body variant number>}
-\newcommand*{\moderncvbody}[2][]{
-  \expandafter\RequirePackage\expandafter[\expandafter#1\expandafter]{\expandafter moderncvbody\romannumeral #2}}
+\newcommand*{\moderncvbody}[2][]{%
+  \@loadmoderncvpackage[#1]{body}{#2}}
 
 % loads a footer variant
-% usage: \moderncvfoot{<footer variant number>}
-\newcommand*{\moderncvfoot}[1]{
-  \expandafter\RequirePackage\expandafter{\expandafter moderncvfoot\romannumeral #1}}
+% usage: \moderncvfoot[<optional foot option>]{<foot variant number>}
+\newcommand*{\moderncvfoot}[2][]{%
+  \@loadmoderncvpackage[#1]{foot}{#2}}
   
 % loads a color scheme
 % usage: \moderncvcolor{<color scheme name>}
-\newcommand*{\moderncvcolor}[1]{
+\newcommand*{\moderncvcolor}[1]{%
   \RequirePackage{moderncvcolor#1}}
 
 % loads an icons set
 % usage: \moderncvicons{<icon set name>}
-\newcommand*{\moderncvicons}[1]{
+\newcommand*{\moderncvicons}[1]{%
   \RequirePackage{moderncvicons#1}}
 
 % recomputes all automatic lengths
@@ -481,21 +529,45 @@
 \newcommand*{\link}[2][]{%
   \ifthenelse{\equal{#1}{}}%
     {\href{#2}{#2}}%
-    {\href{#2}{#1}}}
+    {\href{#2}{\detokenize{#1}}}}
 
 % makes a http hyperlink
 % usage: \httplink[optional text]{link}
 \newcommand*{\httplink}[2][]{%
   \ifthenelse{\equal{#1}{}}%
     {\href{http://#2}{#2}}%
-    {\href{http://#2}{#1}}}
+    {\href{http://#2}{\detokenize{#1}}}}
+
+
+% makes an https hyperlink
+% usage: \httpslink[optional text]{link}
+\newcommand*{\httpslink}[2][]{%
+  \ifthenelse{\equal{#1}{}}%
+    {\href{https://#2}{#2}}%
+    {\href{https://#2}{\detokenize{#1}}}}
 
 % makes an email hyperlink
 % usage: \emaillink[optional text]{link}
 \newcommand*{\emaillink}[2][]{%
   \ifthenelse{\equal{#1}{}}%
     {\href{mailto:#2}{#2}}%
-    {\href{mailto:#2}{#1}}}
+    
+    {\href{mailto:#2}{\detokenize{#1}}}}
+% makes a tel hyperlink
+% usage: \tellink[optional text]{link}
+\newcommand*{\tellink}[2][]{%
+  \ifthenelse{\equal{#1}{}}%
+    {\expandafter\onlynumberslink\expandafter{#2}{#2}}%
+    {\expandafter\onlynumberslink\expandafter{#2}{#1}}}
+
+\ExplSyntaxOn
+\tl_new:N \l_onlynumberslink_tl
+\cs_new:Npn \onlynumberslink #1 #2  {
+    \tl_set:Nn \l_onlynumberslink_tl {#1}
+    \regex_replace_all:nnN {[^0-9+]} {} \l_onlynumberslink_tl
+    \href{ tel\token_to_str:N : \tl_use:N \l_onlynumberslink_tl}{ #2 }
+}
+\ExplSyntaxOff
 
 % cvcolumns environment, where every column is created through \cvcolumn
 % usage: \begin{cvcolumns}
