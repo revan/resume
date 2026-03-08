@@ -16,27 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache TeX Live
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/share/texlive
-            /usr/bin/pdflatex
-            /usr/bin/latex
-          key: texlive-${{ runner.os }}
-          restore-keys: |
-            texlive-${{ runner.os }}
-
-      - name: Install TeX Live (if not cached)
+      - name: Install TeX Live
         run: |
-          if [ ! -d "/usr/share/texlive/texmf-dist" ]; then
-            sudo apt-get update
-            sudo apt-get install -y \
-              texlive-latex-extra \
-              texlive-fonts-recommended \
-              texlive-fonts-extra \
-              texlive-latex-recommended
-          fi
+          sudo apt-get update
+          sudo apt-get install -y \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            texlive-fonts-extra \
+            texlive-latex-recommended
 
       - name: Build PDF
         run: |
