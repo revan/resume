@@ -1,0 +1,79 @@
+name: Build LaTeX PDF
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache TeX Live
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/share/texlive
+            /usr/bin/pdflatex
+            /usr/bin/latex
+          key: texlive-${{ runner.os }}
+          restore-keys: |
+            texlive-${{ runner.os }}
+
+      - name: Install TeX Live (if not cached)
+        run: |
+          if [ ! -d "/usr/share/texlive/texmf-dist" ]; then
+            sudo apt-get update
+            sudo apt-get install -y \
+              texlive-latex-extra \
+              texlive-fonts-recommended \
+              texlive-fonts-extra \
+              texlive-latex-recommended
+          fi
+
+      - name: Build PDF
+        run: |
+          pdflatex -interaction=nonstopmode revan.tex
+
+      - name: Prepare Pages site
+        run: |
+          mkdir public
+          cp revan.pdf public/revan.pdf
+
+          cat << 'EOF' > public/index.html
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Resume: Revan Sopher</title>
+            <style>
+              body { margin:0; }
+              embed { width:100vw; height:100vh; }
+            </style>
+          </head>
+          <body>
+            <embed src="revan.pdf" type="application/pdf">
+          </body>
+          </html>
+          EOF
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+
+    steps:
+      - uses: actions/deploy-pages@v4
