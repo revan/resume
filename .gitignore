@@ -1,4 +1,6 @@
 .idea/
+.junie/
+out/
 *.aux
 *.log
 *.out

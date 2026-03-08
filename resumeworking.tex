@@ -1,23 +1,26 @@
 \documentclass[11pt,letterpaper]{moderncv}
-\moderncvtheme{classic}
 \moderncvcolor{grey}
+\moderncvstyle{classic}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 
 \usepackage[margin=.5in]{geometry}
 \usepackage[none]{hyphenat}
 \usepackage{moderntimeline}
 
 \tlenablemonths
-\tlmaxdates{2012}{2024}
+\tlmaxdates{2012}{2026}
 
+\renewcommand*{\namefont}{\fontsize{70}{72}\sffamily\scshape}
 \name{Revan}{Sopher}
-\address{}{New York City}
+\address{New York, NY}{}{}
 \email{rsopher@gmail.com}
-\social[github]{github.com/revan}
+\collectionadd[github]{socials}{\protect\httpslink[github.com/revan]{github.com/revan}}
 \homepage{revan.io}
 \photo[90pt][0.4pt]{revan.jpeg}
 
 \begin{document}
-\maketitle
+\makecvtitle
 
 \section{Work}
 
